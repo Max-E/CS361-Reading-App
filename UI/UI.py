@@ -52,8 +52,6 @@ class LibraryScreen (wx.lib.scrolledpanel.ScrolledPanel):
         self.sizer = wx.GridSizer (vgap = CELL_PAD, hgap = CELL_PAD)
         self.SetSizer (self.sizer)
         
-        self.SetupScrolling(scroll_x = False)
-        
         self.Bind (wx.EVT_SIZE, self.onResize)
         
     def setSize (self):
@@ -61,6 +59,8 @@ class LibraryScreen (wx.lib.scrolledpanel.ScrolledPanel):
         (w, h) = self.GetSizeTuple ()
         self.sizer.SetCols (width_to_numcolumns(w))
         self.sizer.CalcRowsCols ()
+        self.SetupScrolling(scroll_x = False, scrollToTop = False)
+        self.sizer.Layout ()
     
     def onResize (self, evt):
         
@@ -83,6 +83,8 @@ class LibraryScreen (wx.lib.scrolledpanel.ScrolledPanel):
         
         thumbnail = BookThumbnail (self, bookcallback, bookcover)
         self.sizer.Add (thumbnail, 1, wx.FIXED_MINSIZE)
+        
+        self.setSize()
 
 
 #
