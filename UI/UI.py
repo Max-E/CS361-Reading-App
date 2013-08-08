@@ -132,11 +132,15 @@ class UI:
         self.callback_queue_lock = threading.Lock ()
         self.callback_queue = []
         
+        self.init_lock = threading.Lock ()
+        
+        self.init_lock.acquire ()
+        
         self.gui_thread = threading.Thread (target = self.thread_toplevel)
         self.gui_thread.daemon = True
         self.gui_thread.start ()
         
-        time.sleep (0.5) # let initialization finish
+        self.init_lock.acquire ()
         
     # Called from the same thread as the rest of the program. Used to run 
     # an arbitrary method in the GUI thread.
@@ -166,6 +170,8 @@ class UI:
         
         self.window.Bind (self.EVT_RUN_METHOD, self.onRunMethod)
         self.window.Bind (wx.EVT_CLOSE, self.onClose)
+        
+        self.init_lock.release ()
         
         app.MainLoop ()
     
