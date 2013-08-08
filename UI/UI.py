@@ -130,9 +130,9 @@ class UI:
         self.callback_queue_lock = threading.Lock ()
         self.callback_queue = []
         
-        self.mainloop_thread = threading.Thread (target = self.thread_toplevel)
-        self.mainloop_thread.daemon = True
-        self.mainloop_thread.start ()
+        self.gui_thread = threading.Thread (target = self.thread_toplevel)
+        self.gui_thread.daemon = True
+        self.gui_thread.start ()
         
         time.sleep (0.5) # let initialization finish
         
