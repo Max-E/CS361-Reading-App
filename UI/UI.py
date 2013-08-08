@@ -163,6 +163,7 @@ class UI:
         self.window.AddScreen (self.libraryscreen)
         
         self.window.Bind (self.EVT_RUN_METHOD, self.onRunMethod)
+        self.window.Bind (wx.EVT_CLOSE, self.onClose)
         
         app.MainLoop ()
     
@@ -174,6 +175,12 @@ class UI:
                 self.callback_queue += [callback]
         
         return callback_callback
+    
+    # runs in GUI thread
+    def onClose (self, evt):
+        
+        with self.callback_queue_lock:
+            self.callback_queue += [lambda: exit (0)]
     
     # Begin methods intended to be public:
     
