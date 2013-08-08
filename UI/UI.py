@@ -14,9 +14,9 @@ CELL_PAD = 5
 
 class BookThumbnail (wx.BitmapButton):
     
-    def __init__ (self, parent, bookname, bookcover):
+    def __init__ (self, parent, bookcallback, bookcover):
         
-        self.name = bookname
+        self.callback = bookcallback
         
         img = wx.Image (bookcover)
         img.Rescale (COLUMN_WIDTH, ROW_HEIGHT)
@@ -27,7 +27,7 @@ class BookThumbnail (wx.BitmapButton):
     
     def onClick (self, evt):
         
-        print "CLICKED BOOK \""+self.name+"\""
+        self.callback ()
 
 def width_to_numcolumns (width):
     return (width-wx.SystemSettings.GetMetric (wx.SYS_VSCROLL_X))/(COLUMN_WIDTH+2*CELL_PAD)
@@ -79,9 +79,9 @@ class LibraryScreen (wx.lib.scrolledpanel.ScrolledPanel):
         
         super(LibraryScreen, self).Show()
     
-    def add_book (self, bookname, bookcover):
+    def add_book (self, bookcallback, bookcover):
         
-        thumbnail = BookThumbnail (self, bookname, bookcover)
+        thumbnail = BookThumbnail (self, bookcallback, bookcover)
         self.sizer.Add (thumbnail, 1, wx.FIXED_MINSIZE)
 
 
@@ -96,10 +96,9 @@ class MainWindow (wx.Frame):
         super(MainWindow, self).__init__(None, title = title)
         
         self.sizer = wx.BoxSizer (wx.VERTICAL)
+        self.SetSizer (self.sizer)
         
         self.allscreens = []
-        
-        self.SetSizer (self.sizer)
         
     def AddScreen (self, screen):
         
@@ -127,6 +126,9 @@ class MainWindow (wx.Frame):
 class UI:
     
     def __init__ (self):
+        
+        self.callback_queue_lock = threading.Lock ()
+        self.callback_queue = []
         
         self.mainloop_thread = threading.Thread (target = self.thread_toplevel)
         self.mainloop_thread.daemon = True
@@ -164,13 +166,33 @@ class UI:
         
         app.MainLoop ()
     
+    # runs in either thread, makes callbacks which will run in GUI thread
+    def make_add_callback_callback (self, callback):
+        
+        def callback_callback ():
+            with self.callback_queue_lock:
+                self.callback_queue += [callback]
+        
+        return callback_callback
+    
     # Begin methods intended to be public:
     
     def display_library (self):
         
         self.run_method_in_thread (lambda: self.window.SwitchToScreen (self.libraryscreen))
     
-    def add_book_to_library (self, bookname, bookcover):
+    def add_book_to_library (self, bookcallback, bookcover):
         
-        self.run_method_in_thread (lambda: self.libraryscreen.add_book (bookname, bookcover))
-            
+        callback_callback = self.make_add_callback_callback (bookcallback)
+        self.run_method_in_thread (lambda: self.libraryscreen.add_book (callback_callback, bookcover))
+    
+    def flush_callback_queue (self):
+        
+        old_callback_queue = None
+        with self.callback_queue_lock:
+            old_callback_queue = self.callback_queue
+            self.callback_queue = []
+        
+        for old_callback in old_callback_queue:
+            old_callback ()
+    
