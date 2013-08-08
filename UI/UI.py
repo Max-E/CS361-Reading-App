@@ -1,7 +1,7 @@
 
 
 import wx, wx.lib.scrolledpanel, wx.lib.newevent
-import threading, time
+import threading
 
 
 #
