@@ -14,9 +14,9 @@ CELL_PAD = 5
 
 class BookThumbnail (wx.BitmapButton):
     
-    def __init__ (self, parent, bookcallback, bookcover):
+    def __init__ (self, parent, enqueue_callback, bookcover):
         
-        self.callback = bookcallback
+        self.enqueue_callback = enqueue_callback
         
         img = wx.Image (bookcover)
         img.Rescale (COLUMN_WIDTH, ROW_HEIGHT)
@@ -27,7 +27,7 @@ class BookThumbnail (wx.BitmapButton):
     
     def onClick (self, evt):
         
-        self.callback ()
+        self.enqueue_callback ()
 
 def width_to_numcolumns (width):
     return (width-wx.SystemSettings.GetMetric (wx.SYS_VSCROLL_X))/(COLUMN_WIDTH+2*CELL_PAD)
@@ -79,9 +79,9 @@ class LibraryScreen (wx.lib.scrolledpanel.ScrolledPanel):
         
         super(LibraryScreen, self).Show()
     
-    def add_book (self, bookcallback, bookcover):
+    def add_book (self, enqueue_callback, bookcover):
         
-        thumbnail = BookThumbnail (self, bookcallback, bookcover)
+        thumbnail = BookThumbnail (self, enqueue_callback, bookcover)
         self.sizer.Add (thumbnail, 1, wx.FIXED_MINSIZE)
         
         self.setSize()
@@ -178,11 +178,11 @@ class UI:
     # runs in either thread, makes callbacks which will run in GUI thread
     def make_add_callback_callback (self, callback):
         
-        def callback_callback ():
+        def enqueue_callback ():
             with self.callback_queue_lock:
                 self.callback_queue += [callback]
         
-        return callback_callback
+        return enqueue_callback
     
     # runs in GUI thread
     def onClose (self, evt):
@@ -198,8 +198,8 @@ class UI:
     
     def add_book_to_library (self, bookcallback, bookcover):
         
-        callback_callback = self.make_add_callback_callback (bookcallback)
-        self.run_method_in_thread (lambda: self.libraryscreen.add_book (callback_callback, bookcover))
+        enqueue_callback = self.make_add_callback_callback (bookcallback)
+        self.run_method_in_thread (lambda: self.libraryscreen.add_book (enqueue_callback, bookcover))
     
     def flush_callback_queue (self):
         
