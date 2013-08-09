@@ -4,7 +4,6 @@ import time
 display = UI ()
 
 raw_pages = [
-    "This is the first page.".split(),
     "Hello, this is some test text.".split(),
     "This is some more text.".split(),
     "This is the last page.".split()
@@ -20,11 +19,16 @@ def make_page_callback (i):
         
         for wordnum in xrange (len (raw_pages[i])):
             color_factor = wordnum*(300/len(raw_pages[i]))
-            colors = [255-color_factor, 255-color_factor, color_factor]
-            color = (colors[i%3], colors[(i+1)%3], colors[(i+2)%3])
-            if i == 0:
-                color = None
+            color = None
+            if i == 1:
+                color = (255-color_factor, 255-color_factor, color_factor)
+            elif i == 2 and wordnum == 2:
+                color = (255, 0, 0)
+            elif i == 2 and wordnum == 4:
+                color = (255, 64, 0)
             display.add_bookpage_word (raw_pages[i][wordnum], color)
+            if wordnum+1 != len(raw_pages[i]):
+                display.add_bookpage_word (" ", None)
         
         if i == 0:
             display.set_bookpage_prev (display.display_library)
