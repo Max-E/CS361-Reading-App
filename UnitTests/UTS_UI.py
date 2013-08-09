@@ -67,11 +67,35 @@ class LibraryScreenTestCase (unittest.TestCase):
         time.sleep (0.1)
         assert not display.gui_thread.is_alive ()
 
+class ReadingScreenTestCase (unittest.TestCase):
+    def testDisplayEmptyBookpage (self):
+        display = UI.UI ()
+        assert display.gui_thread.is_alive ()
+
+        display.display_bookpage ()
+        
+        time.sleep (0.1)
+        assert display.gui_thread.is_alive ()
+
+        display.run_method_in_thread (display.app.Exit)
+        time.sleep (0.1)
+        assert not display.gui_thread.is_alive ()
+
+    def testSomethingFail (self):
+        display = UI.UI ()
+        assert display.gui_thread.is_alive ()
+
+        display.add_bookpage_word ("Word")
+
+        time.sleep (0.1)
+        assert display.gui_thread.is_alive ()
+
 
 def suite ():
     suite = unittest.TestSuite ()
     suite.addTest (OpenUITestCase ())
     suite.addTest (LibraryScreenTestCase ())
+    suite.addTest (ReadingScreenTestCase ())
     return suite
 
 
