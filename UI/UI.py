@@ -91,8 +91,8 @@ class LibraryScreen (wx.lib.scrolledpanel.ScrolledPanel):
 # Book Page Screen
 #
 
-ICON_WIDTH = 64
-ICON_HEIGHT = 64
+ICON_WIDTH = 100
+ICON_HEIGHT = 75
 
 class PageButton (wx.BitmapButton):
     
@@ -122,7 +122,7 @@ class BookPageScreen (wx.Panel):
         self.page_title = wx.StaticText (self.topbar_panel, wx.ID_ANY, "insert title here, if any")
         self.topbar_sizer.AddStretchSpacer ()
         self.topbar_sizer.Add (self.page_title, proportion = 1, flag = wx.ALIGN_CENTER_HORIZONTAL | wx.EXPAND)
-        self.quit_button = PageButton (self.topbar_panel, "test_bookcover.png")
+        self.quit_button = PageButton (self.topbar_panel, "test_bookquit.png")
         self.quit_button.Bind (wx.EVT_BUTTON, self.onQuit)
         self.topbar_sizer.Add (self.quit_button, proportion = 0, flag = wx.ALIGN_RIGHT)
         self.sizer.Add (self.topbar_panel, proportion = 0, flag = wx.ALIGN_TOP | wx.EXPAND)
@@ -130,11 +130,11 @@ class BookPageScreen (wx.Panel):
         self.main_panel = wx.Panel (self)        
         self.main_sizer = wx.BoxSizer (wx.HORIZONTAL)
         self.main_panel.SetSizer (self.main_sizer)
-        self.back_button = PageButton (self.main_panel, "test_bookcover.png")
+        self.back_button = PageButton (self.main_panel, "test_bookprev.png")
         self.main_sizer.Add (self.back_button, proportion = 0, flag = wx.ALIGN_LEFT | wx.ALIGN_CENTER_VERTICAL)
         self.illustration = wx.StaticBitmap (self.main_panel, wx.ID_ANY)
         self.main_sizer.Add (self.illustration, proportion = 1, flag = wx.ALIGN_CENTER_HORIZONTAL | wx.EXPAND)
-        self.forward_button = PageButton (self.main_panel, "test_bookcover.png")
+        self.forward_button = PageButton (self.main_panel, "test_booknext.png")
         self.main_sizer.Add (self.forward_button, proportion = 0, flag = wx.ALIGN_RIGHT | wx.ALIGN_CENTER_VERTICAL)
         self.sizer.Add (self.main_panel, proportion = 1, flag = wx.EXPAND)
         
@@ -142,6 +142,13 @@ class BookPageScreen (wx.Panel):
         self.text_sizer = wx.BoxSizer (wx.HORIZONTAL)
         self.text_panel.SetSizer (self.text_sizer)
         self.sizer.Add (self.text_panel, proportion = 0, flag = wx.ALIGN_BOTTOM | wx.EXPAND)
+        
+        self.bottombar_panel = wx.Panel (self)
+        self.bottombar_sizer = wx.BoxSizer (wx.HORIZONTAL)
+        self.bottombar_panel.SetSizer (self.bottombar_sizer)
+        self.speak_button = PageButton (self.bottombar_panel, "test_speakicon.png")
+        self.bottombar_sizer.Add (self.speak_button, proportion = 0, flag = wx.ALIGN_LEFT)
+        self.sizer.Add (self.bottombar_panel, proportion = 0, flag = wx.ALIGN_BOTTOM | wx.EXPAND)
         
         self.Bind (wx.EVT_SIZE, self.onResize)
         
@@ -151,7 +158,7 @@ class BookPageScreen (wx.Panel):
         
         (w, h) = self.main_sizer.GetSizeTuple ()
         
-        img = wx.Image ("test_bookcover.png")
+        img = wx.Image ("test_bookpage.png")
         
         old_w = img.GetWidth ()
         old_h = img.GetHeight ()
@@ -180,7 +187,7 @@ class BookPageScreen (wx.Panel):
     
     def Show (self):
         
-        self.parent.SetSize ((500, 500))
+        self.parent.SetSize ((700, 600))
         
         self.setBitmap()
         
