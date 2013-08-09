@@ -10,7 +10,7 @@ import time
 
 # Things to test:
 #   Creating a window
-#   
+#
 #
 #
 #
@@ -58,6 +58,8 @@ class LibraryScreenTestCase (unittest.TestCase):
         assert (display.libraryscreen.IsShown ())
         
         self._ABADL_Book(1, display)
+        
+        assert display.gui_thread.is_alive ()
 
 
 def suite ():
@@ -65,7 +67,7 @@ def suite ():
     suite.addTest (OpenUITestCase ())
     suite.addTest (LibraryScreenTestCase ())
     return suite
-    
-    
+
+
 if __name__ == "__main__":
     unittest.main()
