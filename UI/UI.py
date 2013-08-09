@@ -30,7 +30,8 @@ class BookThumbnail (wx.BitmapButton):
         self.enqueue_callback ()
 
 def width_to_numcolumns (width):
-    return (width-wx.SystemSettings.GetMetric (wx.SYS_VSCROLL_X))/(COLUMN_WIDTH+2*CELL_PAD)
+    ret = (width-wx.SystemSettings.GetMetric (wx.SYS_VSCROLL_X))/(COLUMN_WIDTH+2*CELL_PAD)
+    return max (ret, 0)
 
 def numcolumns_to_width (numcolumns):
     return numcolumns*(COLUMN_WIDTH+2*CELL_PAD)+wx.SystemSettings.GetMetric (wx.SYS_VSCROLL_X)
