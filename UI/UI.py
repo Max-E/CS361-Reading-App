@@ -21,7 +21,7 @@ class BookThumbnail (wx.BitmapButton):
         img = wx.Image (bookcover)
         img.Rescale (COLUMN_WIDTH, ROW_HEIGHT)
         
-        super(BookThumbnail, self).__init__(parent, wx.ID_ANY, img.ConvertToBitmap())
+        super(BookThumbnail, self).__init__(parent, wx.ID_ANY, img.ConvertToBitmap(), size = (COLUMN_WIDTH, ROW_HEIGHT))
         
         self.Bind (wx.EVT_BUTTON, self.onClick, self)
     
@@ -85,6 +85,141 @@ class LibraryScreen (wx.lib.scrolledpanel.ScrolledPanel):
         self.sizer.Add (thumbnail, 1, wx.FIXED_MINSIZE)
         
         self.setSize()
+
+
+#
+# Book Page Screen
+#
+
+ICON_WIDTH = 64
+ICON_HEIGHT = 64
+
+class PageButton (wx.BitmapButton):
+    
+    def __init__ (self, parent, iconpath):
+        
+        img = wx.Image (iconpath)
+        img.Rescale (ICON_WIDTH, ICON_HEIGHT)
+        
+        super(PageButton, self).__init__(parent, wx.ID_ANY, img.ConvertToBitmap())
+        
+class BookPageScreen (wx.Panel):
+    
+    def __init__ (self, parent, quitcallback):
+        
+        super(BookPageScreen, self).__init__ (parent)
+        
+        self.parent = parent
+        
+        self.sizer = wx.BoxSizer (wx.VERTICAL)
+        self.SetSizer (self.sizer)
+        
+        self.onQuit = lambda evt: quitcallback ()
+        
+        self.topbar_panel = wx.Panel (self)
+        self.topbar_sizer = wx.BoxSizer (wx.HORIZONTAL)
+        self.topbar_panel.SetSizer (self.topbar_sizer)
+        self.page_title = wx.StaticText (self.topbar_panel, wx.ID_ANY, "insert title here, if any")
+        self.topbar_sizer.AddStretchSpacer ()
+        self.topbar_sizer.Add (self.page_title, proportion = 1, flag = wx.ALIGN_CENTER_HORIZONTAL | wx.EXPAND)
+        self.quit_button = PageButton (self.topbar_panel, "test_bookcover.png")
+        self.quit_button.Bind (wx.EVT_BUTTON, self.onQuit)
+        self.topbar_sizer.Add (self.quit_button, proportion = 0, flag = wx.ALIGN_RIGHT)
+        self.sizer.Add (self.topbar_panel, proportion = 0, flag = wx.ALIGN_TOP | wx.EXPAND)
+
+        self.main_panel = wx.Panel (self)        
+        self.main_sizer = wx.BoxSizer (wx.HORIZONTAL)
+        self.main_panel.SetSizer (self.main_sizer)
+        self.back_button = PageButton (self.main_panel, "test_bookcover.png")
+        self.main_sizer.Add (self.back_button, proportion = 0, flag = wx.ALIGN_LEFT | wx.ALIGN_CENTER_VERTICAL)
+        self.illustration = wx.StaticBitmap (self.main_panel, wx.ID_ANY)
+        self.main_sizer.Add (self.illustration, proportion = 1, flag = wx.ALIGN_CENTER_HORIZONTAL | wx.EXPAND)
+        self.forward_button = PageButton (self.main_panel, "test_bookcover.png")
+        self.main_sizer.Add (self.forward_button, proportion = 0, flag = wx.ALIGN_RIGHT | wx.ALIGN_CENTER_VERTICAL)
+        self.sizer.Add (self.main_panel, proportion = 1, flag = wx.EXPAND)
+        
+        self.text_panel = wx.Panel (self)
+        self.text_sizer = wx.BoxSizer (wx.HORIZONTAL)
+        self.text_panel.SetSizer (self.text_sizer)
+        self.sizer.Add (self.text_panel, proportion = 0, flag = wx.ALIGN_BOTTOM | wx.EXPAND)
+        
+        self.Bind (wx.EVT_SIZE, self.onResize)
+        
+        self.clear ()
+    
+    def setBitmap (self):
+        
+        (w, h) = self.main_sizer.GetSizeTuple ()
+        
+        img = wx.Image ("test_bookcover.png")
+        
+        old_w = img.GetWidth ()
+        old_h = img.GetHeight ()
+        
+        new_w = w
+        if self.forward_button.IsShown ():
+            new_w -= ICON_WIDTH
+        if self.back_button.IsShown ():
+            new_w -= ICON_WIDTH
+        new_h = (new_w*old_h)/old_w
+        if new_h > h:
+            new_h = h
+            new_w = (new_h*old_w)/old_h
+        
+        img.Rescale (new_w, new_h)
+        
+        self.illustration.SetBitmap (img.ConvertToBitmap())
+        self.Layout ()
+    
+    def onResize (self, evt):
+        
+        self.setBitmap ()
+        
+        evt.Skip ()
+    
+    
+    def Show (self):
+        
+        self.parent.SetSize ((500, 500))
+        
+        self.setBitmap()
+        
+        self.sizer.Layout ()
+        
+        super(BookPageScreen, self).Show()
+    
+    def clear (self):
+        
+        self.text_sizer.Clear (True)
+        self.text_sizer.AddStretchSpacer ()
+        self.text_sizer.Add (wx.StaticText (self.text_panel, wx.ID_ANY, ""), flag = wx.ALIGN_LEFT)
+        
+        self.back_button.Hide ()
+        self.forward_button.Hide ()
+        self.Layout ()
+    
+    def add_word (self, word_text, word_color):
+        
+        text = wx.StaticText (self.text_panel, wx.ID_ANY, word_text)
+        text.SetForegroundColour (word_color)
+        text.SetFont (wx.Font (20, wx.FONTFAMILY_DEFAULT, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_NORMAL))
+        
+        self.text_sizer.Add (text, wx.ALIGN_CENTER_HORIZONTAL | wx.FIXED_MINSIZE)
+        
+        self.Layout ()
+    
+    def set_back (self, enqueue_callback):
+        
+        self.back_button.Bind (wx.EVT_BUTTON, lambda evt: enqueue_callback())
+        self.back_button.Show ()
+        self.Layout ()
+    
+    def set_forward (self, enqueue_callback):
+        
+        self.forward_button.Bind (wx.EVT_BUTTON, lambda evt: enqueue_callback())
+        self.forward_button.Show ()
+        self.Layout ()
+    
 
 
 #
@@ -168,6 +303,9 @@ class UI:
         self.libraryscreen = LibraryScreen (self.window)
         self.window.AddScreen (self.libraryscreen)
         
+        self.bookpagescreen = BookPageScreen (self.window, self.make_add_callback_callback (self.display_library))
+        self.window.AddScreen (self.bookpagescreen)
+        
         self.window.Bind (self.EVT_RUN_METHOD, self.onRunMethod)
         self.window.Bind (wx.EVT_CLOSE, self.onClose)
         
@@ -200,6 +338,28 @@ class UI:
         
         enqueue_callback = self.make_add_callback_callback (bookcallback)
         self.run_method_in_thread (lambda: self.libraryscreen.add_book (enqueue_callback, bookcover))
+    
+    def clear_bookpage (self):
+        
+        self.run_method_in_thread (lambda: self.bookpagescreen.clear ())
+    
+    def add_bookpage_word (self, word_text, word_color):
+        
+        self.run_method_in_thread (lambda: self.bookpagescreen.add_word (word_text, word_color))
+    
+    def set_bookpage_next (self, nextpage_callback):
+        
+        enqueue_callback = self.make_add_callback_callback (nextpage_callback)
+        self.run_method_in_thread (lambda: self.bookpagescreen.set_forward (enqueue_callback))
+    
+    def set_bookpage_prev (self, prevpage_callback):
+        
+        enqueue_callback = self.make_add_callback_callback (prevpage_callback)
+        self.run_method_in_thread (lambda: self.bookpagescreen.set_back (enqueue_callback))
+    
+    def display_bookpage (self):
+        
+        self.run_method_in_thread (lambda: self.window.SwitchToScreen (self.bookpagescreen))
     
     def flush_callback_queue (self):
         
