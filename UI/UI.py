@@ -112,6 +112,8 @@ class BookPageScreen (wx.Panel):
         
         self.parent = parent
         
+        self.min_size = (700, 600)
+        
         self.sizer = wx.BoxSizer (wx.VERTICAL)
         self.SetSizer (self.sizer)
         
@@ -160,6 +162,8 @@ class BookPageScreen (wx.Panel):
         
         (w, h) = self.main_sizer.GetSizeTuple ()
         
+        w = max (w, self.min_size[0])
+        
         img = wx.Image ("test_bookpage.png")
         
         old_w = img.GetWidth ()
@@ -171,7 +175,7 @@ class BookPageScreen (wx.Panel):
             w -= ICON_WIDTH
         new_w = w
         new_h = (new_w*old_h)/old_w
-        if new_h > h:
+        if new_h > h and h > 0:
             new_h = h
             new_w = (new_h*old_w)/old_h
         
@@ -204,7 +208,7 @@ class BookPageScreen (wx.Panel):
     
     def Show (self):
         
-        self.parent.SetMinSize ((700, 600))
+        self.parent.SetMinSize (self.min_size)
         
         self.setSize()
         
