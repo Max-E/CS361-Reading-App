@@ -301,7 +301,7 @@ class UI:
     # GUI thread main loop
     def thread_toplevel (self):
         
-        app = wx.App()
+        self.app = wx.App()
         
         self.RunMethodEvent, self.EVT_RUN_METHOD = wx.lib.newevent.NewEvent ()
         
@@ -318,7 +318,7 @@ class UI:
         
         self.init_lock.release ()
         
-        app.MainLoop ()
+        self.app.MainLoop ()
     
     # runs in either thread, makes callbacks which will run in GUI thread
     def make_add_callback_callback (self, callback):

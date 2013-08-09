@@ -20,7 +20,10 @@ class OpenUITestCase (unittest.TestCase):
     def runTest (self):
         display = UI.UI ()
         assert display.gui_thread.is_alive ()
-
+        display.run_method_in_thread (display.app.Exit)
+        time.sleep (0.1)
+        assert not display.gui_thread.is_alive ()
+        
 # Create Display Object
 # Add Books
 # Display Library
@@ -60,6 +63,9 @@ class LibraryScreenTestCase (unittest.TestCase):
         self._ABADL_Book(1, display)
         
         assert display.gui_thread.is_alive ()
+        display.run_method_in_thread (display.app.Exit)
+        time.sleep (0.1)
+        assert not display.gui_thread.is_alive ()
 
 
 if __name__ == "__main__":
