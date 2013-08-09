@@ -133,9 +133,10 @@ class BookPageScreen (wx.Panel):
         self.back_button = PageButton (self.main_panel, "test_bookprev.png")
         self.main_sizer.Add (self.back_button, proportion = 0, flag = wx.ALIGN_LEFT | wx.ALIGN_CENTER_VERTICAL)
         self.illustration = wx.StaticBitmap (self.main_panel, wx.ID_ANY)
-        self.main_sizer.Add (self.illustration, proportion = 1, flag = wx.ALIGN_CENTER_HORIZONTAL | wx.EXPAND)
+        self.main_sizer.Add (self.illustration, proportion = 1, flag = wx.EXPAND)
         self.forward_button = PageButton (self.main_panel, "test_booknext.png")
         self.main_sizer.Add (self.forward_button, proportion = 0, flag = wx.ALIGN_RIGHT | wx.ALIGN_CENTER_VERTICAL)
+        self.main_sizer.InsertSpacer (1, (1,1))
         self.sizer.Add (self.main_panel, proportion = 1, flag = wx.EXPAND)
         
         self.text_panel = wx.Panel (self)
@@ -163,11 +164,11 @@ class BookPageScreen (wx.Panel):
         old_w = img.GetWidth ()
         old_h = img.GetHeight ()
         
-        new_w = w
         if self.forward_button.IsShown ():
-            new_w -= ICON_WIDTH
+            w -= ICON_WIDTH
         if self.back_button.IsShown ():
-            new_w -= ICON_WIDTH
+            w -= ICON_WIDTH
+        new_w = w
         new_h = (new_w*old_h)/old_w
         if new_h > h:
             new_h = h
@@ -175,31 +176,44 @@ class BookPageScreen (wx.Panel):
         
         img.Rescale (new_w, new_h)
         
+        self.main_sizer.Remove (1)
+        self.main_sizer.InsertSpacer (1, ((w-new_w)/2, 1))
+        
         self.illustration.SetBitmap (img.ConvertToBitmap())
+    
+    def centerText (self):
+        
+        (avail_w, avail_h) = self.text_sizer.GetSizeTuple()
+        
+        self.text_sizer.Remove (0)
+        self.text_sizer.PrependSpacer (((avail_w-self.text_total_width)/2, 1))
+    
+    def setSize (self):
+        
+        self.setBitmap ()
+        self.centerText ()
+        
         self.Layout ()
     
     def onResize (self, evt):
         
-        self.setBitmap ()
+        self.setSize ()
         
         evt.Skip ()
     
-    
     def Show (self):
         
-        self.parent.SetSize ((700, 600))
+        self.parent.SetMinSize ((700, 600))
         
-        self.setBitmap()
-        
-        self.sizer.Layout ()
+        self.setSize()
         
         super(BookPageScreen, self).Show()
     
     def clear (self):
         
         self.text_sizer.Clear (True)
-        self.text_sizer.AddStretchSpacer ()
-        self.text_sizer.Add (wx.StaticText (self.text_panel, wx.ID_ANY, ""), flag = wx.ALIGN_LEFT)
+        self.text_total_width = 0
+        self.text_sizer.Add ((1,1))
         
         self.back_button.Hide ()
         self.forward_button.Hide ()
@@ -211,9 +225,10 @@ class BookPageScreen (wx.Panel):
         text.SetForegroundColour (word_color)
         text.SetFont (wx.Font (20, wx.FONTFAMILY_DEFAULT, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_NORMAL))
         
-        self.text_sizer.Add (text, wx.ALIGN_CENTER_HORIZONTAL | wx.FIXED_MINSIZE)
+        (w, h) = text.GetSize ()
+        self.text_total_width += w
         
-        self.Layout ()
+        self.text_sizer.Add (text, 0, wx.ALIGN_LEFT)
     
     def set_back (self, enqueue_callback):
         
