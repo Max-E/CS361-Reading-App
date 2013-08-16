@@ -5,6 +5,7 @@ import sys
 
 sys.path.append ("../UI")
 import UI
+from page import Page
 import time
 
 
@@ -68,6 +69,8 @@ class LibraryScreenTestCase (unittest.TestCase):
         assert not display.gui_thread.is_alive ()
 
 class ReadingScreenTestCase (unittest.TestCase):
+
+    
     def testDisplayEmptyBookpage (self):
         display = UI.UI ()
         assert display.gui_thread.is_alive ()
@@ -89,6 +92,18 @@ class ReadingScreenTestCase (unittest.TestCase):
 
         time.sleep (0.1)
         assert display.gui_thread.is_alive ()
+
+    def testMakePage (self):
+        display = UI.UI ()
+        testpages = ["Testpage1", "Testpage2"]
+        
+        prevpage_callback = lambda: 4
+        nextpage_callback = lambda: 5
+
+        page = Page (display, testpages[0], "test_bookpage.png", prevpage_callback, nextpage_callback)
+
+        assert(page)
+        
 
 
 def suite ():
