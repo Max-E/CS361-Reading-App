@@ -1,13 +1,23 @@
 from UI import UI
+from page import Page
 import time
 
 display = UI ()
 
 raw_pages = [
-    "Hello, this is some test text.".split(),
-    "This is some more text.".split(),
-    "This is the last page.".split()
+    "Hello, this is some test text.",
+    "This is some more text.",
+    "This is some more text.",
+    "This is some more text.",
+    "This is some more text.",
+    "This is some more text.",
+    "This is some more text.",
+    "This is some more text.",
+    "This is some more text.",
+    "This is the last page."
 ]
+
+
 
 page_callbacks = []
 
@@ -15,32 +25,19 @@ def make_page_callback (i):
     
     def ret ():
         
-        display.clear_bookpage ()
+        prevpage_callback = None
+        nextpage_callback = None
+        if i != 0:
+            prevpage_callback = page_callbacks[i-1]
+        if i+1 != len (raw_pages):
+            nextpage_callback = page_callbacks[i+1]
         
-        for wordnum in xrange (len (raw_pages[i])):
-            color_factor = wordnum*(300/len(raw_pages[i]))
-            color = None
-            if i == 1:
-                color = (255-color_factor, 255-color_factor, color_factor)
-            elif i == 2 and wordnum == 2:
-                color = (255, 0, 0)
-            elif i == 2 and wordnum == 4:
-                color = (255, 64, 0)
-            display.add_bookpage_word (raw_pages[i][wordnum], color)
-            if wordnum+1 != len(raw_pages[i]):
-                display.add_bookpage_word (" ", None)
+        page = Page (display, raw_pages[i], prevpage_callback = prevpage_callback, nextpage_callback = nextpage_callback)
         
-        if i == 0:
-            display.set_bookpage_prev (display.display_library)
-        else:
-            display.set_bookpage_prev (page_callbacks[i-1])
+        if i != 0:
+            page.set_confidences ([1-float(i)/float(len(raw_pages)-1)]*page.numwords)
         
-        if i+1 == len(raw_pages):
-            display.set_bookpage_next (display.display_library)
-        else:
-            display.set_bookpage_next (page_callbacks[i+1])
-        
-        display.display_bookpage ()
+        page.show ()
         
     return ret
 
