@@ -31,11 +31,13 @@ class Page:
         
         self.display = display
         
-        self.prevpage_callback, self.nextpage_callback = prevpage_callback, nextpage_callback
-        
         self.words = text.split ()
         self.numwords = len (self.words)
         self.confidences = [None]*self.numwords
+        
+        self.prevpage_callback, self.nextpage_callback = prevpage_callback, nextpage_callback
+        
+        self.illustration_path = illustration_path
     
     def show (self):
         
@@ -46,6 +48,8 @@ class Page:
         
         if self.nextpage_callback != None:
             self.display.set_bookpage_next (self.nextpage_callback)
+        
+        self.display.set_bookpage_illustration_path (self.illustration_path)
         
         for wordnum in xrange (self.numwords):
             word = self.words[wordnum]

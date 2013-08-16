@@ -113,6 +113,7 @@ class BookPageScreen (wx.Panel):
         self.parent = parent
         
         self.min_size = (700, 600)
+        self.illustration_path = "test_bookpage.png"
         
         self.sizer = wx.BoxSizer (wx.VERTICAL)
         self.SetSizer (self.sizer)
@@ -164,7 +165,7 @@ class BookPageScreen (wx.Panel):
         
         w = max (w, self.min_size[0])
         
-        img = wx.Image ("test_bookpage.png")
+        img = wx.Image (self.illustration_path)
         
         old_w = img.GetWidth ()
         old_h = img.GetHeight ()
@@ -247,6 +248,10 @@ class BookPageScreen (wx.Panel):
         self.forward_button.Show ()
         self.Layout ()
     
+    def set_illustration_path (self, illustration_path):
+        
+        self.illustration_path = illustration_path
+        self.setSize ()
 
 
 #
@@ -383,6 +388,9 @@ class UI:
         
         enqueue_callback = self.make_add_callback_callback (prevpage_callback)
         self.run_method_in_thread (lambda: self.bookpagescreen.set_back (enqueue_callback))
+    
+    def set_bookpage_illustration_path (self, illustration_path):
+        self.run_method_in_thread (lambda: self.bookpagescreen.set_illustration_path (illustration_path))
     
     def display_bookpage (self):
         

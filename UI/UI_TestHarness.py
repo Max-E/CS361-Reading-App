@@ -4,12 +4,19 @@ import time
 
 display = UI ()
 
+illustrations = [
+    "test_bookpage1.png",
+    "test_bookpage2.png",
+    "test_bookpage3.png",
+    "test_bookpage4.png"
+]
+
 raw_pages = [
+    "One fish",
+    "two fish",
+    "red fish",
+    "blue fish",
     "Hello, this is some test text.",
-    "This is some more text.",
-    "This is some more text.",
-    "This is some more text.",
-    "This is some more text.",
     "This is some more text.",
     "This is some more text.",
     "This is some more text.",
@@ -32,7 +39,11 @@ def make_page_callback (i):
         if i+1 != len (raw_pages):
             nextpage_callback = page_callbacks[i+1]
         
-        page = Page (display, raw_pages[i], prevpage_callback = prevpage_callback, nextpage_callback = nextpage_callback)
+        illustration_path = "test_bookpage.png"
+        if i < len(illustrations):
+            illustration_path = illustrations[i]
+        
+        page = Page (display, raw_pages[i], illustration_path, prevpage_callback, nextpage_callback)
         
         if i != 0:
             page.set_confidences ([1-float(i)/float(len(raw_pages)-1)]*page.numwords)
